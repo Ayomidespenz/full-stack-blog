@@ -140,13 +140,28 @@ export default {
         loading.value = true;
         error.value = null;
         
-        await authStore.register(form.value);
+        // Prepare the registration data
+        const registrationData = {
+          name: form.value.name,
+          username: form.value.username,
+          email: form.value.email,
+          password: form.value.password,
+          password_confirmation: form.value.password_confirmation,
+          terms: form.value.terms
+        };
         
-        // Redirect to dashboard or home after registration
+        // Log the registration data for debugging
+        console.log('Registration data:', registrationData);
+        
+        // Call the auth store's register method
+        await authStore.register(registrationData);
+        
+        // Redirect to home after successful registration
         router.push('/');
         
       } catch (err) {
-        error.value = err.response?.data?.message || 'Registration failed. Please try again.';
+        console.error('Registration error:', err);
+        error.value = err.response?.data?.message || err.message || 'Registration failed. Please try again.';
       } finally {
         loading.value = false;
       }

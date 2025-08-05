@@ -10,7 +10,7 @@
             <router-link to="/blog" class="btn btn-primary btn-lg px-4">Read Our Blog</router-link>
           </div>
           <div class="col-lg-6 d-none d-lg-block">
-            <img src="@/assets/about-hero.svg" alt="About us illustration" class="img-fluid">
+            <img src="@/assets/blog-hero.svg" alt="About us illustration" class="img-fluid">
           </div>
         </div>
       </div>

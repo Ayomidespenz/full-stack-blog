@@ -10,6 +10,7 @@ use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -97,8 +98,13 @@ class PostController extends Controller
         }
 
         $data = $validator->validated();
-        $data['user_id'] = auth()->id();
+        // $data['user_id'] = auth()->id();
         $data['slug'] = $data['slug'] ?? Str::slug($data['title']);
+        
+        // Ensure required fields are set
+        if (!isset($data['status'])) {
+            $data['status'] = 'draft';
+        }
         
         // Handle featured image upload
         if ($request->hasFile('featured_image')) {
@@ -109,16 +115,35 @@ class PostController extends Controller
         // Create post
         $post = Post::create($data);
 
-        // Attach categories
+        // Attach categories if provided
         if (isset($data['categories']) && is_array($data['categories'])) {
-            $categoryIds = array_map('intval', $data['categories']);
-            $post->categories()->sync($categoryIds);
+            try {
+                $categories = collect($data['categories'])->map(function ($category) {
+                    return is_array($category) ? ($category['id'] ?? $category) : $category;
+                })->toArray();
+                
+                $post->categories()->sync($categories);
+            } catch (\Exception $e) {
+                // Log the error but don't fail the request
+                Log::error('Error syncing categories: ' . $e->getMessage());
+            }
         }
 
-        // Attach tags
+        // Attach tags if provided
         if (isset($data['tags']) && is_array($data['tags'])) {
-            $tagIds = array_map('intval', $data['tags']);
-            $post->tags()->sync($tagIds);
+            try {
+                $tags = collect($data['tags'])->map(function ($tag) {
+                    if (is_array($tag)) {
+                        return $tag['id'] ?? $tag;
+                    }
+                    return $tag;
+                })->toArray();
+                
+                $post->tags()->sync($tags);
+            } catch (\Exception $e) {
+                // Log the error but don't fail the request
+                Log::error('Error syncing tags: ' . $e->getMessage());
+            }
         }
 
         return new PostResource($post->load(['user', 'categories', 'tags']));

@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\TagController;
+use App\Http\Controllers\Api\TestController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -48,6 +49,9 @@ Route::get('/categories/{category:slug}', [CategoryController::class, 'show'])->
 // Tags public routes
 Route::get('/tags', [TagController::class, 'index']);
 Route::get('/tags/{tag:slug}', [TagController::class, 'show'])->name('api.tags.show');
+
+// Test route for debugging authentication
+Route::get('/test-auth', [TestController::class, 'testAuth']);
 
 // Protected routes (require authentication)
 Route::middleware('auth:sanctum')->group(function () {

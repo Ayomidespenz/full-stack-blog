@@ -1,7 +1,13 @@
 // CSS Imports
-import './assets/main.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap-icons/font/bootstrap-icons.css'
+import '@/assets/styles/main.css'
+
+// Google Fonts
+const link = document.createElement('link')
+link.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'
+link.rel = 'stylesheet'
+document.head.appendChild(link)
 
 // JS Imports
 import { createApp } from 'vue'

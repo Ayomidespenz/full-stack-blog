@@ -17,7 +17,7 @@
             </div>
           </div>
           <div class="col-lg-6 d-none d-lg-block">
-            <img src="@/assets/contact-hero.svg" alt="Contact us illustration" class="img-fluid">
+            <img src="@/assets/blog-hero.svg" alt="Contact us illustration" class="img-fluid">
           </div>
         </div>
       </div>

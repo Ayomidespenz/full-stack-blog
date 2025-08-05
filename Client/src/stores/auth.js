@@ -48,11 +48,16 @@ export const useAuthStore = defineStore('auth', () => {
       loading.value = true;
       error.value = null;
       
-      const response = await axios.post('http://localhost:8000/api/auth/login', credentials);
-      const { user: userData, token: authToken } = response.data;
+      const response = await axios.post('/auth/login', {
+        email: credentials.email,
+        password: credentials.password,
+        remember: credentials.remember || false
+      });
       
-      setAuth(userData, authToken);
-      return userData;
+      const { user, access_token } = response.data;
+      setAuth(user, access_token);
+      
+      return { success: true };
       
     } catch (err) {
       error.value = err.response?.data?.message || 'Login failed';
@@ -67,15 +72,48 @@ export const useAuthStore = defineStore('auth', () => {
       loading.value = true;
       error.value = null;
       
-      const response = await axios.post('http://localhost:8000/api/auth/register', userData);
-      const { user: registeredUser, token: authToken } = response.data;
+      // Log the request data for debugging
+      console.log('Sending registration request with data:', userData);
       
-      setAuth(registeredUser, authToken);
-      return registeredUser;
+      const response = await axios.post('http://localhost:8000/api/auth/register', userData, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log('Registration response:', response.data);
+      
+      if (response.data.user && response.data.access_token) {
+        const { user, access_token } = response.data;
+        setAuth(user, access_token);
+        return { success: true };
+      } else {
+        throw new Error('Invalid response format from server');
+      }
       
     } catch (err) {
-      error.value = err.response?.data?.message || 'Registration failed';
-      throw err;
+      console.error('Registration error:', err);
+      
+      // Extract error message from response or use default
+      let errorMessage = 'Registration failed. Please try again.';
+      
+      if (err.response) {
+        // Server responded with an error status code
+        if (err.response.data?.message) {
+          errorMessage = err.response.data.message;
+        } else if (err.response.data?.errors) {
+          // Handle Laravel validation errors
+          const errors = Object.values(err.response.data.errors).flat();
+          errorMessage = errors.join(' ');
+        }
+      } else if (err.request) {
+        // The request was made but no response was received
+        errorMessage = 'No response from server. Please check your connection.';
+      }
+      
+      error.value = errorMessage;
+      throw new Error(errorMessage);
     } finally {
       loading.value = false;
     }
